@@ -1,0 +1,17 @@
+preguntas 
+LMF2-350M
+temp: 0.3
+¿Cuál fue el motivo del ingreso?  
+Respuesta: 
+El paciente fue ingresado por dolor abdominal intenso en la fosa ilíaca derecha de 24 horas. Se sospecha de apendicitis aguda.
+
+json
+"motivo_ingreso": "Paciente masculino de 45 años que consulta por dolor abdominal intenso en fosa ilíaca derecha de 24 horas de evolución, 
+acompañado de náuseas y vómitos.",
+
+LMF2-350M
+temp: 0.1
+¿Cuál fue el motivo del ingreso?  
+Respuesta:
+El paciente ingresó debido a dolor abdominal intenso en la fosa ilíaca derecha, acompañado de náuseas y vómitos. 
+Se le ordenó tratamiento inmediato con enalapril y metformina.

@@ -581,7 +581,6 @@ async function handleIndex() {
 
     setStatus("index-status", "Creando chunks...", "loading");
     const chunks = createChunks(jsonData);
-    console.log({chunks}); // Agrega esta línea para dep
 
     setStatus(
       "index-status",

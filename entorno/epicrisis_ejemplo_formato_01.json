@@ -1,0 +1,273 @@
+{
+  "id_atencion": 1416169,
+  "paciente": {
+    "sexo": "F",
+    "edad": 68
+  },
+  "atencion": {
+    "id": "1416169",
+    "fecha_ingreso": "2025-12-15",
+    "fecha_alta": "2025-12-26"
+  },
+  "motivo_ingreso": "Post operatorio cirugia de Miles por cancer de recto",
+  "antecedentes": {
+    "medicos": [
+      "HTA",
+      "Cardiopatia hipertensiva",
+      "FA paroxistica",
+      "Enfermedad hepatica cronica con hipertension portal"
+    ],
+    "quirurgicos": [
+      "Protesis de cadera derecha por artrosis severa"
+    ],
+    "alergias": "Sin alergias conocidas"
+  },
+  "diagnostico_ingreso": [
+    { "codigo": "C20", "nombre": "Tumor maligno del recto" },
+    { "codigo": "K74.6", "nombre": "Cirrosis hepatica, otra y la no especificada" },
+    { "codigo": "J90", "nombre": "Derrame pleural no clasificado en otra parte" }
+  ],
+  "procedimientos": [
+    { "codigo": "48.52", "nombre": "Cirugia de Miles (reseccion abdominoperineal)" },
+    { "codigo": "34.04", "nombre": "Pleurostomia 24 FR" },
+    { "codigo": "87.41", "nombre": "TAC de torax" },
+    { "codigo": "87.43", "nombre": "TAC de abdomen y pelvis" },
+    { "codigo": "86.22", "nombre": "VAC perineal (curacion con presion negativa)" }
+  ],
+  "tratamientos_intrahosp": [
+    { "codigo": "ATC:J01CR05", "nombre": "Piperacilina/Tazobactam", "via": "EV", "inicio": "2025-12-15", "fin": "2025-12-19" },
+    { "codigo": "ATC:J01DH02", "nombre": "Meropenem 1g c/8h", "via": "EV", "inicio": "2025-12-19", "fin": "2025-12-26" },
+    { "codigo": "ATC:J01XA01", "nombre": "Ceftriaxona", "via": "EV", "inicio": "2025-12-15", "fin": "2025-12-17" },
+    { "codigo": "ATC:J01XD01", "nombre": "Metronidazol", "via": "EV", "inicio": "2025-12-15", "fin": "2025-12-17" }
+  ],
+  "evolucion_resumen": [
+    {
+      "dia": 1,
+      "texto": "TORAX- PLEUROSTOMIA PACIENTE POST OP DE CIRUGIA DE MILES. DERRAME PLEURAL BILATERAL, A DERECHA MODERADO A SEVERO ACTUALMENTE EN TAC DE TORAX DE CONTROL. SE INSTALA PLEUROSTOMIA 24 FR, LA QUE SE FIJA EN 14 CM, DANDO SALIDA A 1000 CC DE CONTENIDO SERORO OSCURO. SE CLAMPEA POR TOS. SE TOMAN MUESTRAS PARA ESTUDIO DE LIQUIDO: CITOQUIMICO, PH, CULTIVO. SE SUGIERE: - EVACUAR 500 CC CADA 1HR HASTA DEJAR DESCLAMPEADO. - MANANA ASPIRATIVO A PARTIR DE LAS 8 AM. - CONTROL DE RX MANANA - KNT R Y M + TRIFLO"
+    },
+    {
+      "dia": 2,
+      "texto": "TORAX ESTABLE, PLEUROSTOMIA 1340 CC SEROHEMATICO. RADIOGRAFIA CON EXPANSION PULMONAR COMPLETA. EX: MP + DISMINUIDO A BASE DERECHA ESTUDIO INICIAL DE LIQUIDO PLEURAL, COMPATIBLE CON EXUDADO. SE SUGIERE: MANTENER ASPIRATIVO KNT R Y M + TRIFLO SEGUIMIENTO DE PLEUROSTOMIA"
+    },
+    {
+      "dia": 3,
+      "texto": "TORAX PACIENTE ESTABLE, SIN DIFICULTAD RESPIRATORIA, SAT 96-98 CON FIO2 AMBIENTAL. PLEUROSTOMIA 800 CC SEROSO ULTIMAS 12 HRS. ULTIMO TAC CON SIGNOS DE DHC E HIPERTENSION PORTAL, ASOCIADO A ASCITIS EN ESTE CONTEXTO, ESTO PUEDE ESTAR FAVORECIENDO ALTO DEBITO DE DRENAJE PLEURAL. EX: MP CONSERVADO A DERECHA, LEVEMENTE DISMINUIDO A IZQUIERDA. SE SUGIERE: POR AHORA DRENAJE NO ASPIRATIVO CAMBIO DE ACQUEASEAL DE SER NECESARIO CONTROL DE RX MANANA SE SUGIERE EVALUAR COMPONENTE DE DHC Y MANEJO A FIN DE DISMINUIR DEBITO DE DRENAJE TORACICO"
+    },
+    {
+      "dia": 4,
+      "texto": "TORAX ESTABLE RESPIRATORIO 400 CC EN 12 HRS. PROBABLEMENTE EN CONTEXTO DE ASCITIS Y SIGNOS DE DHC + HIPERTENSION PORTAL EX: MP + CONSERVADO SRA PLAN: MANTENER SEP NO ASPIRATIVO KN T R Y M POR 2 VECES DIA CONTROL DE RX HOY (ORDEN REALIZADA) SE SUGIERE EVALUACION POR MEDICINA INTERNA/GASTRO | EN SIMILARES CONDICIONES. CON NAUSEAS"
+    },
+    {
+      "dia": 5,
+      "texto": "TORAX ESTABLE, RADIOGRAFIA DE AYER CON EXPANSION COMPLETA, SIN DIFICULTAD RESPIRATORIA. ACQUASEAL AL TOPE. SE INDICA CAMBIO INMEDIATO. EX: MP + CONSERVADO A DERECHA PLEUROSTOMIA 1000 CC EN 24 HRS SE SUGIERE: DEBE SER EVALUADA DEL PUNTO DE VISTA DE ASCITIS MANTENER KNT 2 VECES AL DIA + TRIFLO OBSERVAR DEBITOS EN FORMA ESTRICTA MANTENER NO ASPIRATIVO SEGUIMIENTO POR TORAX | Medicina interna Enterado. HTA, cirugia de cancer de colon hace 1 mes aprox. TAC con hallazgos compatibles con DHC. Desde ayer con nauseas y vomitos alimentarios. Ex fisico: impresiona icterica, abdomen distendido, timpanico. plan - ajusto terapia - exs: p. hepaticas - Evaluacion por Gastro - Reevaluacion SOS. | 68 anios, sin alergias conocidas. AM: HTA, cardiopatia hipertensiva, FA paroxistica, enfermedad hepatica cronica con HTP. Cx: protesis de cadera derecha (por artrosis severa) Mascotas: gatos En el marco de un Ca de recto que progreso a pesar de QMT, se hospitalizo para Cx de miles. Evoluciono en el post op con colecciones perineal y en excavacion pelviana. Ya esta en sala, se alimenta poco, con nauseas y vomitos persistentes. Parametros inflamatorios estacionarios (PCR 15), GB: 12.770, VHS: 9 se sugiere: 1.- Suspender piperacilina-tazobactam 2.- Meropenem 1 gr cada 8 IV 3.- TAC de abdomen y pelvis c/c 4.- Considerar traslado a sala de mayor complejidad atte AGUAYO"
+    },
+    {
+      "dia": 6,
+      "texto": "TORAX ESTABLE, TAC DE TORAX DE CONTROL CON MINIMO DERRAME RESIDUAL DERECHO Y LEVE IZQUIERDO. EXPANSION ADECUADA. ACTUALMENTE 120 CC EN 12 HRS PLAN: MANTENER NO ASPIRATIVO KNT + TRIFLO SE REEVALUARA RETIRO SEGUN DEBITO"
+    },
+    {
+      "dia": 7,
+      "texto": "TORAX ESTABLE DEL PUNTO DE VISTA VENTILATORIO DISMINUCION DEL DEBITO DIARIO. 300 CC EN 24 HRS. ACTUALMENTE EN MANEJO DE LIQUIDO ASCITICO, CON BUENA RESPUESTA SE SUGIERE: MANTENER NO ASPIRATIVO RETIRO CON DEBITO CERCANO A 150 CC KN T R Y M"
+    },
+    {
+      "dia": 8,
+      "texto": "TORAX ESTABLE, 550 CC EN 24 HRS. SIN COMPROMISO VENTILATORIO. EN ESPERA DE DISMINUCION DE DEBITO PARA RETIRO DE SEP. POR AHORA SIN CAMBIOS"
+    },
+    {
+      "dia": 9,
+      "texto": "TORAX ESTABLE, HOY 390 CC DE DEBITO. EX: MP + CONSERVADO PLAN: MANTENER KNT MANTENER NO ASPIRATIVO EVENTUAL RETIRO MANANA SEGUN DEBITO"
+    },
+    {
+      "dia": 10,
+      "texto": "TORAX ESTABLE 310 CC EN 24 HRS (PERO 50 CC MAS EN LA BAJA POST MEDICION) DE TODAS FORMAS CON DEBITO A LA BAJA, LENTO SE CONVERSA CON PACIENTE, SE DECIDE MANTENER PLAN: KNT R Y M MANTENER NO ASPIRATIVO MANTENER MANEJO DE ASCITIS (EL CUAL HA SIDO EFECTIVO)"
+    },
+    {
+      "dia": 12,
+      "texto": "TORAX ESTABLE, DEBITO DE 50 CC EN 24 HRS, POR LO QUE SE DECIDE RETIRO. PROCEDIMIENTO SIN INCIDENTES. PLAN: MANTENER CON KNT CAMBIO DE APOSITO SOS RETIRO DE PUNTOS EN 5-7 DIAS REEVALUACION POR CIRUGIA DE TORAX SOS"
+    }
+  ],
+  "laboratorios_resumen": [
+    {
+      "prueba": "Hemoglobina en sangre total",
+      "unidad": "g/dL",
+      "ingreso": {
+        "valor": 7.8,
+        "fecha": "2025-12-25T07:11:09",
+        "rango_inferior": 12.3,
+        "rango_superior": 15.3,
+        "estado": "bajo"
+      },
+      "periodo": {
+        "min": 7.8,
+        "max": 7.8
+      }
+    },
+    {
+      "prueba": "Hematocrito",
+      "unidad": "%",
+      "ingreso": {
+        "valor": 23.7,
+        "fecha": "2025-12-25T07:11:09",
+        "rango_inferior": 35,
+        "rango_superior": 47,
+        "estado": "bajo"
+      },
+      "periodo": {
+        "min": 23.7,
+        "max": 23.7
+      }
+    },
+    {
+      "prueba": "Recuento de leucocitos (absoluto)",
+      "unidad": "x10^9/L",
+      "ingreso": {
+        "valor": 12.62,
+        "fecha": "2025-12-25T07:11:09",
+        "rango_inferior": 4.4,
+        "rango_superior": 11.3,
+        "estado": "alto"
+      },
+      "periodo": {
+        "min": 12.62,
+        "max": 12.62
+      }
+    },
+    {
+      "prueba": "Proteina C reactiva",
+      "unidad": "mg/dL",
+      "ingreso": {
+        "valor": 8.79,
+        "fecha": "2025-12-25T07:11:11",
+        "rango_inferior": 0,
+        "rango_superior": 0.49,
+        "estado": "alto"
+      },
+      "periodo": {
+        "min": 8.79,
+        "max": 8.79
+      }
+    },
+    {
+      "prueba": "Albumina en sangre",
+      "unidad": "g/dL",
+      "ingreso": {
+        "valor": 2.82,
+        "fecha": "2025-12-25T07:11:10",
+        "rango_inferior": 3.5,
+        "rango_superior": 5.2,
+        "estado": "bajo"
+      },
+      "periodo": {
+        "min": 2.82,
+        "max": 2.82
+      }
+    },
+    {
+      "prueba": "Potasio plasmatico",
+      "unidad": "mmol/L",
+      "ingreso": {
+        "valor": 3.3,
+        "fecha": "2025-12-25T07:11:10",
+        "rango_inferior": 3.5,
+        "rango_superior": 5.1,
+        "estado": "bajo"
+      },
+      "periodo": {
+        "min": 3.3,
+        "max": 3.3
+      }
+    },
+    {
+      "prueba": "Calcio en sangre",
+      "unidad": "mg/dL",
+      "ingreso": {
+        "valor": 7.6,
+        "fecha": "2025-12-25T07:11:10",
+        "rango_inferior": 8.8,
+        "rango_superior": 10.2,
+        "estado": "bajo"
+      },
+      "periodo": {
+        "min": 7.6,
+        "max": 7.6
+      }
+    },
+    {
+      "prueba": "Creatinina en sangre",
+      "unidad": "mg/dL",
+      "ingreso": {
+        "valor": 0.63,
+        "fecha": "2025-12-25T07:11:10",
+        "rango_inferior": 0.5,
+        "rango_superior": 0.9,
+        "estado": "normal"
+      },
+      "periodo": {
+        "min": 0.63,
+        "max": 0.63
+      }
+    },
+    {
+      "prueba": "Sodio plasmatico",
+      "unidad": "mmol/L",
+      "ingreso": {
+        "valor": 143.1,
+        "fecha": "2025-12-25T07:11:10",
+        "rango_inferior": 136,
+        "rango_superior": 145,
+        "estado": "normal"
+      },
+      "periodo": {
+        "min": 143.1,
+        "max": 143.1
+      }
+    },
+    {
+      "prueba": "Recuento de plaquetas (absoluto)",
+      "unidad": "x10^3/uL",
+      "ingreso": {
+        "valor": 170,
+        "fecha": "2025-12-25T07:11:09",
+        "rango_inferior": 150,
+        "rango_superior": 450,
+        "estado": "normal"
+      },
+      "periodo": {
+        "min": 170,
+        "max": 170
+      }
+    }
+  ],
+  "diagnostico_egreso": [
+    { "codigo": "C20", "nombre": "Tumor maligno del recto - Post operatorio cirugia de Miles" },
+    { "codigo": "J90", "nombre": "Derrame pleural bilateral resuelto" },
+    { "codigo": "K74.6", "nombre": "Enfermedad hepatica cronica con hipertension portal" },
+    { "codigo": "K65.0", "nombre": "Coleccion pelviana post quirurgica en tratamiento" }
+  ],
+  "indicaciones_alta": {
+    "medicamentos": [
+      { "codigo": "ATC:J01DH02", "nombre": "Meropenem", "dosis": "1g", "via": "EV", "frecuencia": "cada 8 horas", "duracion": "Completar esquema segun infectologia" }
+    ],
+    "controles": [
+      "Control con cirugia de torax en caso de sintomas respiratorios",
+      "Control con cirugia digestiva para seguimiento de colostomia",
+      "Control con infectologia para ajuste de antibioticos",
+      "Retiro de puntos de pleurostomia en 5-7 dias"
+    ],
+    "cuidados": [
+      "Curacion de herida perineal con VAC segun indicacion",
+      "Curacion de sitio de pleurostomia",
+      "Cuidados de colostomia",
+      "Kinesioterapia respiratoria y motora",
+      "Ejercicios con Triflo"
+    ],
+    "signos_alarma": [
+      "Fiebre mayor a 38C",
+      "Disnea o dificultad respiratoria",
+      "Dolor toracico",
+      "Aumento de volumen o secrecion por heridas",
+      "Nauseas o vomitos persistentes",
+      "Ictericia progresiva"
+    ]
+  }
+}

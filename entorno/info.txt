@@ -15,3 +15,26 @@ temp: 0.1
 Respuesta:
 El paciente ingresó debido a dolor abdominal intenso en la fosa ilíaca derecha, acompañado de náuseas y vómitos. 
 Se le ordenó tratamiento inmediato con enalapril y metformina.
+
+
+LiquidAI_LFM2-1.2B-RAG-Q4_K_M.gguf">LiquidAI LFM2-1.2B-RAG Q4 (~800MB - Equilibrado)
+
+¿como fue la evolucion del paciente del dia 3?
+Fuentes:
+[DOC 1416169 | evolucion_dia | dia=3]
+[DOC 1416169 | evolucion_dia | dia=3]
+Respuesta:
+La evolución del paciente del dia 3 fue favorable, con dieta blanda tolerada sin problemas, 
+movilización activa, deposiciones presentes, afebris y heridas en buen estado.
+chunk dia 3 : [TIPO] Evolución diaria
+[DIA] 3
+[INGRESO] 2025-12-15
+[ALTA] 2025-12-26
+
+[TEXTO]
+TORAX PACIENTE ESTABLE, SIN DIFICULTAD RESPIRATORIA, SAT 96-98 CON FIO2 AMBIENTAL. PLEUROSTOMIA 800 CC SEROSO ULTIMAS 12 HRS. 
+ULTIMO TAC CON SIGNOS DE DHC E HIPERTENSION PORTAL, ASOCIADO A ASCITIS EN ESTE CONTEXTO, 
+ESTO PUEDE ESTAR FAVORECIENDO ALTO DEBITO DE DRENAJE PLEURAL. 
+EX: MP CONSERVADO A DERECHA, LEVEMENTE DISMINUIDO A IZQUIERDA. 
+SE SUGIERE: POR AHORA DRENAJE NO ASPIRATIVO CAMBIO DE ACQUEASEAL DE SER NECESARIO CONTROL DE RX MANANA 
+SE SUGIERE EVALUAR COMPONENTE DE DHC Y MANEJO A FIN DE DISMINUIR DEBITO DE DRENAJE TORACICO

@@ -51,17 +51,25 @@ async function initDB() {
 }
 
 async function putChunk(chunk) {
-  const tx = state.db.transaction(STORE_CHUNKS, "readwrite");
-  const store = tx.objectStore(STORE_CHUNKS);
-  await store.put(chunk);
-  return tx.complete;
+  return new Promise((resolve, reject) => {
+    const tx = state.db.transaction(STORE_CHUNKS, "readwrite");
+    const store = tx.objectStore(STORE_CHUNKS);
+    store.put(chunk);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error("IndexedDB putChunk failed"));
+    tx.onabort = () => reject(tx.error || new Error("IndexedDB putChunk aborted"));
+  });
 }
 
 async function putVector(vectorData) {
-  const tx = state.db.transaction(STORE_VECTORS, "readwrite");
-  const store = tx.objectStore(STORE_VECTORS);
-  await store.put(vectorData);
-  return tx.complete;
+  return new Promise((resolve, reject) => {
+    const tx = state.db.transaction(STORE_VECTORS, "readwrite");
+    const store = tx.objectStore(STORE_VECTORS);
+    store.put(vectorData);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error("IndexedDB putVector failed"));
+    tx.onabort = () => reject(tx.error || new Error("IndexedDB putVector aborted"));
+  });
 }
 
 async function getAllVectors() {
@@ -92,10 +100,17 @@ async function getChunksByKeys(keys) {
 }
 
 async function clearAll() {
-  const tx1 = state.db.transaction(STORE_CHUNKS, "readwrite");
-  const tx2 = state.db.transaction(STORE_VECTORS, "readwrite");
-  await tx1.objectStore(STORE_CHUNKS).clear();
-  await tx2.objectStore(STORE_VECTORS).clear();
+  const clearStore = (storeName) =>
+    new Promise((resolve, reject) => {
+      const tx = state.db.transaction(storeName, "readwrite");
+      const store = tx.objectStore(storeName);
+      store.clear();
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error || new Error(`IndexedDB clear failed: ${storeName}`));
+      tx.onabort = () => reject(tx.error || new Error(`IndexedDB clear aborted: ${storeName}`));
+    });
+
+  await Promise.all([clearStore(STORE_CHUNKS), clearStore(STORE_VECTORS)]);
 }
 
 // ============================================================================
@@ -444,16 +459,23 @@ function mmr(queryVec, candidates, allVectors, k, lambda = 0.7) {
 // ============================================================================
 
 function buildPrompt(chunks, question) {
-  let prompt = "Responde en español.\n";
-  prompt += "Usa SOLO el CONTEXTO proporcionado.\n";
-  prompt +=
-    'Si la respuesta no está en el contexto, di: "No está en el informe."\n\n';
+  let prompt = "";
+  prompt += "Eres un asistente clínico.\n";
+  prompt += "Responde en español.\n";
+  prompt += "REGLAS ESTRICTAS:\n";
+  prompt += "1) Usa SOLO información que aparezca literalmente en el CONTEXTO.\n";
+  prompt += "2) NO inventes datos (fechas, días, valores, unidades, signos vitales).\n";
+  prompt += "3) NO conviertas unidades ni interpretes abreviaturas. Copia los términos tal cual (ej: 'SAT 96-98', 'FIO2 AMBIENTAL', '800 CC').\n";
+  prompt += "4) Si algo no está explícito, escribe: 'No está en el informe'.\n";
+  prompt += "5) Responde en 3 a 6 viñetas. Al final agrega una línea: 'Fuente: <sourceHint>'.\n\n";
+
   prompt += "CONTEXTO:\n";
   chunks.forEach((chunk, idx) => {
     prompt += `${idx + 1}. ${chunk.sourceHint}\n${chunk.text}\n\n`;
   });
+
   prompt += `Pregunta: ${question}\n`;
-  prompt += "Respuesta:";
+  prompt += "Respuesta (viñetas):";
   return prompt;
 }
 
@@ -578,6 +600,8 @@ async function handleIndex() {
   try {
     const text = await state.currentFile.text();
     const jsonData = JSON.parse(text);
+    // Ensure we don't mix previous documents with the new upload.
+    await clearAll();
 
     setStatus("index-status", "Creando chunks...", "loading");
     const chunks = createChunks(jsonData);
@@ -621,6 +645,16 @@ async function handleIndex() {
   } finally {
     btn.disabled = false;
   }
+}
+// Deduplicate retrieved chunks by chunkKey
+function dedupeByChunkKey(chunks) {
+  const seen = new Set();
+  return chunks.filter((c) => {
+    if (!c || !c.chunkKey) return false;
+    if (seen.has(c.chunkKey)) return false;
+    seen.add(c.chunkKey);
+    return true;
+  });
 }
 
 async function handleAsk() {
@@ -734,6 +768,7 @@ async function handleAsk() {
     // 1) cargar metadata chunks + parsear filtros desde la pregunta
     const allChunks = await getAllChunks();
     const filters = parseQueryFilters(question);
+    const requestedDay = filters.day;
 
     // 2) aplicar filtros (por tipo y/o por día) para acotar candidatos
     const allowedKeys = prefilterChunkKeys(allChunks, filters);
@@ -753,16 +788,12 @@ async function handleAsk() {
     // 4) traer chunks definitivos
     const chunkKeys = top4.map((item) => item.chunkKey);
     const retrievedChunks = await getChunksByKeys(chunkKeys);
-    /*     setStatus("answer-status", "Recuperando documentos...", "loading");
-    const allVectors = await getAllVectors();
-    const top10 = topK(qvec, allVectors, 10);
-    const top4 = mmr(qvec, top10, allVectors, 4, 0.7);
-
-    const chunkKeys = top4.map((item) => item.chunkKey);
-    const retrievedChunks = await getChunksByKeys(chunkKeys); */
+    const uniqueChunks = dedupeByChunkKey(retrievedChunks);
 
     setStatus("answer-status", "Generando respuesta...", "loading");
-    const prompt = buildPrompt(retrievedChunks, question);
+    const prompt = buildPrompt(uniqueChunks, question);
+    console.log("RAG selected chunks:", uniqueChunks.map(c => ({ chunkKey: c.chunkKey, sourceHint: c.sourceHint })));
+    console.log("RAG prompt (first 2000 chars):", prompt.slice(0, 2000));
 
     const response = await state.wllama.createCompletion(prompt, {
       nPredict: 512,
@@ -773,7 +804,21 @@ async function handleAsk() {
     });
 
     const answer = response.trim();
-    showAnswer(answer, retrievedChunks);
+    // Guardrail: if the user asked for a specific day, avoid mentioning other days.
+    if (requestedDay !== null) {
+      const dayMention = answer.toLowerCase().match(/\b(d[ií]a)\s*(\d{1,2})\b/g);
+      if (dayMention) {
+        // If any mentioned day differs from requestedDay, append a warning for debugging.
+        const mismatched = dayMention.some((m) => {
+          const num = parseInt(m.replace(/[^0-9]/g, ""), 10);
+          return Number.isFinite(num) && num !== requestedDay;
+        });
+        if (mismatched) {
+          console.warn("Respuesta menciona un día distinto al solicitado. requestedDay=", requestedDay, "mentions=", dayMention);
+        }
+      }
+    }
+    showAnswer(answer, uniqueChunks);
     setStatus("answer-status", "Respuesta generada", "success");
   } catch (err) {
     console.error(err);

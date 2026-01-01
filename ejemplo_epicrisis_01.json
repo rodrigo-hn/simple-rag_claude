@@ -1,0 +1,70 @@
+{
+  "id_atencion": "1416169",
+  "motivo_ingreso": "Paciente masculino de 45 años que consulta por dolor abdominal intenso en fosa ilíaca derecha de 24 horas de evolución, acompañado de náuseas y vómitos.",
+  "antecedentes": "HTA en tratamiento con Enalapril 10mg/día. DM2 en tratamiento con Metformina 850mg c/12h. No alergias conocidas.",
+  "diagnostico_ingreso": "Abdomen agudo a estudio. Sospecha de apendicitis aguda.",
+  "diagnostico_egreso": "Apendicitis aguda complicada. Post-operatorio de apendicectomía laparoscópica sin complicaciones.",
+  "procedimientos": "Apendicectomía laparoscópica bajo anestesia general. Duración del procedimiento: 45 minutos. Sin complicaciones intraoperatorias.",
+  "tratamientos": "Antibioticoterapia con Ceftriaxona 1g IV c/12h por 5 días. Analgesia con Tramadol 50mg IV PRN. Manejo de líquidos endovenosos.",
+  "evolucion_resumen": [
+    {
+      "dia": 1,
+      "texto": "Paciente ingresa al servicio de urgencias con dolor abdominal intenso. Signo de McBurney positivo. Leucocitosis de 15.000. Se solicita TAC de abdomen que confirma apendicitis aguda. Pasa a pabellón."
+    },
+    {
+      "dia": 2,
+      "texto": "Post-operatorio inmediato estable. Paciente tolera líquidos. Dolor controlado con analgesia. Heridas quirúrgicas sin signos de infección. Hemodinámicamente estable."
+    },
+    {
+      "dia": 3,
+      "texto": "Evolución favorable. Inicia dieta blanda que tolera sin problemas. Movilización activa. Deposiciones presentes. Afebril. Heridas en buen estado."
+    },
+    {
+      "dia": 4,
+      "texto": "Paciente en buenas condiciones generales. Tolera dieta completa. Tránsito intestinal normal. Sin signos de complicaciones. Se programa alta médica."
+    }
+  ],
+  "laboratorios_resumen": [
+    {
+      "examen": "Leucocitos",
+      "resultado": "15000/mm³",
+      "fecha": "2024-01-10"
+    },
+    {
+      "examen": "Neutrófilos",
+      "resultado": "85%",
+      "fecha": "2024-01-10"
+    },
+    {
+      "examen": "PCR",
+      "resultado": "120 mg/L",
+      "fecha": "2024-01-10"
+    },
+    {
+      "examen": "Leucocitos (control)",
+      "resultado": "8500/mm³",
+      "fecha": "2024-01-13"
+    },
+    {
+      "examen": "PCR (control)",
+      "resultado": "15 mg/L",
+      "fecha": "2024-01-13"
+    },
+    {
+      "examen": "Glicemia",
+      "resultado": "110 mg/dL",
+      "fecha": "2024-01-10"
+    },
+    {
+      "examen": "Creatinina",
+      "resultado": "0.9 mg/dL",
+      "fecha": "2024-01-10"
+    }
+  ],
+  "indicaciones_alta": {
+    "medicamentos": "Paracetamol 500mg cada 8 horas por 5 días en caso de dolor. Amoxicilina + Ácido Clavulánico 875/125mg cada 12 horas por 7 días. Continuar con Enalapril 10mg/día y Metformina 850mg c/12h.",
+    "controles": "Control en 7 días con cirugía general. Control de heridas operatorias en 10 días para retiro de puntos. Control con médico tratante para seguimiento de patologías crónicas.",
+    "cuidados": "Reposo relativo por 2 semanas. Evitar esfuerzos físicos intensos por 4 semanas. Mantener heridas limpias y secas. Dieta liviana los primeros días, luego progresar según tolerancia.",
+    "signos_alarma": "Consultar de inmediato si presenta: fiebre mayor a 38°C, dolor abdominal intenso, enrojecimiento o secreción purulenta en heridas, vómitos persistentes, distensión abdominal importante."
+  }
+}

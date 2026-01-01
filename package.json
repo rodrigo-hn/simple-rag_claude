@@ -1,0 +1,22 @@
+{
+  "name": "local-chat",
+  "version": "1.0.0",
+  "description": "Local RAG chat con LLM y embeddings en el navegador",
+  "type": "module",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "build": "cd backend && npm run build",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "setup": "npm run install-backend && npm run build"
+  },
+  "keywords": [
+    "rag",
+    "llm",
+    "wllama",
+    "transformers",
+    "browser"
+  ],
+  "author": "",
+  "license": "MIT"
+}

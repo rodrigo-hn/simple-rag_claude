@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Chat - RAG en el Navegador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Local Chat - RAG</h1>
+      <p class="subtitle">LLM + Embeddings 100% en el navegador</p>
+      <div id="isolation-status" class="status-box">
+        <span id="isolation-text">Verificando crossOriginIsolated...</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Sección 1: Cargar Modelo LLM -->
+      <section class="card">
+        <h2>1. Cargar Modelo LLM</h2>
+        <div class="model-selector-group">
+          <label for="model-select" class="model-label">Seleccionar Modelo:</label>
+          <select id="model-select" class="model-select">
+            <option value="LFM2-350M-Q8_0.gguf">LFM2-350M Q8 (~350MB - Rápido)</option>
+            <option value="LiquidAI_LFM2-1.2B-RAG-Q4_K_M.gguf">LiquidAI LFM2-1.2B-RAG Q4 (~800MB - Equilibrado)</option>
+            <option value="LiquidAI_LFM2-1.2B-RAG-Q5_K_M.gguf">LiquidAI LFM2-1.2B-RAG Q5 (~1GB - Mejor calidad)</option>
+          </select>
+        </div>
+        <button id="load-model-btn" class="btn btn-primary">Cargar Modelo LLM</button>
+        <div id="model-status" class="status-text"></div>
+      </section>
+
+      <!-- Sección 2: Subir e Indexar Documento -->
+      <section class="card">
+        <h2>2. Subir e Indexar Documento</h2>
+        <div class="file-input-group">
+          <label for="file-input" class="file-label">Seleccionar Epicrisis JSON:</label>
+          <input type="file" id="file-input" accept=".json" />
+        </div>
+        <button id="index-btn" class="btn btn-secondary" disabled>Indexar</button>
+        <div id="index-status" class="status-text"></div>
+      </section>
+
+      <!-- Sección 3: Hacer Preguntas -->
+      <section class="card">
+        <h2>3. Hacer Preguntas</h2>
+        <div class="question-group">
+          <label for="question-input">Pregunta:</label>
+          <input type="text" id="question-input" placeholder="Ej: ¿Cuál fue el motivo de ingreso?" />
+        </div>
+        <button id="ask-btn" class="btn btn-primary" disabled>Preguntar</button>
+        <div id="answer-status" class="status-text"></div>
+
+        <div id="answer-section" class="answer-box" style="display: none;">
+          <h3>Respuesta:</h3>
+          <div id="answer-text" class="answer-content"></div>
+        </div>
+
+        <div id="sources-section" class="sources-box" style="display: none;">
+          <h3>Fuentes:</h3>
+          <ul id="sources-list"></ul>
+        </div>
+      </section>
+
+      <!-- Sección 4: Utilidades -->
+      <section class="card">
+        <h2>Utilidades</h2>
+        <button id="clear-db-btn" class="btn btn-danger">Limpiar Base de Datos</button>
+        <div id="clear-status" class="status-text"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Powered by Wllama + Transformers.js</p>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

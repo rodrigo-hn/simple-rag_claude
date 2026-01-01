@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Wllama Import</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #0f0;
+    }
+    .status { margin: 10px 0; padding: 10px; background: #2a2a2a; }
+    .error { color: #f00; }
+    .success { color: #0f0; }
+  </style>
+</head>
+<body>
+  <h1>Test de Importación de Wllama</h1>
+  <div id="log"></div>
+
+  <script type="module">
+    const log = document.getElementById('log');
+
+    function addLog(message, isError = false) {
+      const div = document.createElement('div');
+      div.className = 'status ' + (isError ? 'error' : 'success');
+      div.textContent = message;
+      log.appendChild(div);
+    }
+
+    addLog('1. Verificando crossOriginIsolated: ' + window.crossOriginIsolated);
+
+    try {
+      addLog('2. Intentando importar desde esm.run...');
+      const { Wllama } = await import('https://esm.run/@wllama/wllama');
+      addLog('✓ Import exitoso desde esm.run');
+      addLog('✓ Wllama class: ' + typeof Wllama);
+    } catch (err) {
+      addLog('✗ Error con esm.run: ' + err.message, true);
+
+      try {
+        addLog('3. Intentando importar desde unpkg...');
+        const { Wllama } = await import('https://unpkg.com/@wllama/wllama@1/dist/esm/index.js');
+        addLog('✓ Import exitoso desde unpkg');
+        addLog('✓ Wllama class: ' + typeof Wllama);
+      } catch (err2) {
+        addLog('✗ Error con unpkg: ' + err2.message, true);
+
+        try {
+          addLog('4. Intentando importar desde skypack...');
+          const { Wllama } = await import('https://cdn.skypack.dev/@wllama/wllama');
+          addLog('✓ Import exitoso desde skypack');
+          addLog('✓ Wllama class: ' + typeof Wllama);
+        } catch (err3) {
+          addLog('✗ Error con skypack: ' + err3.message, true);
+          addLog('✗ Todas las CDNs fallaron. Se necesita servir localmente.', true);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

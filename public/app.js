@@ -8,7 +8,7 @@ import {
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.backends.onnx.wasm.numThreads = window.crossOriginIsolated
-  ? (navigator.hardwareConcurrency || 4)
+  ? navigator.hardwareConcurrency || 4
   : 1;
 env.backends.onnx.wasm.proxy = false;
 
@@ -58,8 +58,10 @@ async function putChunk(chunk) {
     const store = tx.objectStore(STORE_CHUNKS);
     store.put(chunk);
     tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error || new Error("IndexedDB putChunk failed"));
-    tx.onabort = () => reject(tx.error || new Error("IndexedDB putChunk aborted"));
+    tx.onerror = () =>
+      reject(tx.error || new Error("IndexedDB putChunk failed"));
+    tx.onabort = () =>
+      reject(tx.error || new Error("IndexedDB putChunk aborted"));
   });
 }
 
@@ -69,8 +71,10 @@ async function putVector(vectorData) {
     const store = tx.objectStore(STORE_VECTORS);
     store.put(vectorData);
     tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error || new Error("IndexedDB putVector failed"));
-    tx.onabort = () => reject(tx.error || new Error("IndexedDB putVector aborted"));
+    tx.onerror = () =>
+      reject(tx.error || new Error("IndexedDB putVector failed"));
+    tx.onabort = () =>
+      reject(tx.error || new Error("IndexedDB putVector aborted"));
   });
 }
 
@@ -108,8 +112,10 @@ async function clearAll() {
       const store = tx.objectStore(storeName);
       store.clear();
       tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error || new Error(`IndexedDB clear failed: ${storeName}`));
-      tx.onabort = () => reject(tx.error || new Error(`IndexedDB clear aborted: ${storeName}`));
+      tx.onerror = () =>
+        reject(tx.error || new Error(`IndexedDB clear failed: ${storeName}`));
+      tx.onabort = () =>
+        reject(tx.error || new Error(`IndexedDB clear aborted: ${storeName}`));
     });
 
   await Promise.all([clearStore(STORE_CHUNKS), clearStore(STORE_VECTORS)]);
@@ -460,26 +466,142 @@ function mmr(queryVec, candidates, allVectors, k, lambda = 0.7) {
 // Prompt construction
 // ============================================================================
 
+function compactChunkForPrompt(chunk, maxChars = 1200) {
+  if (!chunk || !chunk.text) return "";
+  const txt = String(chunk.text);
+
+  // Prefer only the [TEXTO] section when present (reduces long clinical notes)
+  const m = txt.match(/\[TEXTO\]\s*\n([\s\S]*)/i);
+  const body = (m ? m[1] : txt).trim();
+
+  // Keep small header lines (TIPO/DIA/INGRESO/ALTA/EDAD/SEXO/MOTIVO)
+  const headerLines = txt
+    .split(/\r?\n/)
+    .filter((l) => /^\[(TIPO|DIA|INGRESO|ALTA|EDAD|SEXO|MOTIVO)\]/i.test(l))
+    .slice(0, 10)
+    .join("\n");
+
+  const combined = (headerLines ? headerLines + "\n\n" : "") + body;
+  if (combined.length <= maxChars) return combined;
+  return combined.slice(0, maxChars) + "\n[...TRUNCADO...]";
+}
+
 function buildPrompt(chunks, question) {
   let prompt = "";
-  prompt += "Eres un motor de extracción clínica.\n";
+  /*   prompt += "Eres un motor de extracción clínica.\n";
   prompt += "NO redactes. NO resumas. NO interpretes.\n";
   prompt += "SOLO COPIA FRASES EXACTAS DEL CONTEXTO.\n";
   prompt += "REGLAS (OBLIGATORIAS):\n";
   prompt += "1) Responde con EXACTAMENTE 4 viñetas.\n";
-  prompt += "2) Cada viñeta DEBE ser una frase copiada literalmente del CONTEXTO (sin cambiar palabras ni unidades).\n";
-  prompt += "3) NO agregues palabras propias, NO agregues negaciones generales tipo 'No hay signos de...' salvo que exista literalmente en el CONTEXTO.\n";
-  prompt += "4) Después de las 4 viñetas, escribe EXACTAMENTE una línea: 'Fuente: <sourceHint>'.\n";
-  prompt += "5) No escribas nada más después de la línea Fuente.\n\n";
+  prompt +=
+    "2) Cada viñeta DEBE ser una frase copiada literalmente del CONTEXTO (sin cambiar palabras ni unidades).\n";
+  prompt +=
+    "3) NO agregues palabras propias, NO agregues negaciones generales tipo 'No hay signos de...' salvo que exista literalmente en el CONTEXTO.\n";
+  prompt +=
+    "4) Después de las 4 viñetas, escribe EXACTAMENTE una línea: 'Fuente: <sourceHint>'.\n";
+  prompt += "5) No escribas nada más después de la línea Fuente.\n\n"; */
+  prompt += "TAREA: extrae 4 frases EXACTAS del CONTEXTO.\n";
+  prompt +=
+    "FORMATO: 4 líneas con '- ' y luego una sola línea: 'Fuente: <sourceHint>'.\n";
+  prompt += "PROHIBIDO: inventar, resumir, interpretar.\n\n";
 
   prompt += "CONTEXTO:\n";
-  chunks.forEach((chunk, i) => {
+  /*   chunks.forEach((chunk, i) => {
     prompt += `${i + 1}. ${chunk.sourceHint}\n${chunk.text}\n\n`;
+  }); */
+  chunks.forEach((chunk, i) => {
+    const compact = compactChunkForPrompt(chunk, 1200);
+    prompt += `${i + 1}. ${chunk.sourceHint}\n${compact}\n\n`;
   });
 
   prompt += `Pregunta: ${question}\n`;
   prompt += "Respuesta:\n- ";
   return prompt;
+}
+
+// ============================================================================
+// Output post-processing (enforce 4 bullet extraction) + fallback
+// ============================================================================
+
+function looksLikeGarbage(output) {
+  if (!output) return true;
+  const s = String(output);
+  // repeated numeric / hyphen patterns like: 1000-15-12-15-...
+  if (/\b\d{3,}(?:-\d{1,4}){4,}\b/.test(s)) return true;
+  // extremely repetitive short tokens
+  if (/(\b\w+\b)(?:\s*\1){10,}/i.test(s)) return true;
+  return false;
+}
+
+function extractFourSentencesFromChunk(chunkText) {
+  // Prefer the [TEXTO] section if present
+  const m = chunkText.match(/\[TEXTO\]\s*\n([\s\S]*)/i);
+  const body = (m ? m[1] : chunkText).trim();
+
+  // Split by newlines first (clinical notes often use line breaks)
+  let parts = body
+    .split(/\n+/)
+    .map((x) => x.trim())
+    .filter((x) => x.length > 0);
+
+  // If still too few, split by sentence punctuation.
+  if (parts.length < 4) {
+    parts = body
+      .split(/(?<=[\.!\?])\s+/)
+      .map((x) => x.trim())
+      .filter((x) => x.length > 0);
+  }
+
+  // Take first 4 items, but keep them EXACT as they appear.
+  return parts.slice(0, 4);
+}
+
+function buildDeterministicExtraction(chunks) {
+  // Use the top chunk as the primary source.
+  const primary = chunks && chunks.length ? chunks[0] : null;
+  if (!primary) return { answer: "No está en el informe.", sources: [] };
+
+  const bullets = extractFourSentencesFromChunk(primary.text);
+  // Ensure exactly 4 bullets; if fewer, pad with empty-safe repeats of existing lines.
+  while (bullets.length < 4) {
+    bullets.push(
+      bullets[bullets.length - 1] || primary.text.trim().slice(0, 200)
+    );
+  }
+
+  const answer =
+    bullets.map((b) => `- ${b}`).join("\n") + `\nFuente: ${primary.sourceHint}`;
+
+  return { answer, sources: [primary] };
+}
+
+function enforceExtractionFormat(rawOutput, chunks) {
+  const out = String(rawOutput || "").trim();
+
+  // Must contain at least 4 bullet lines and a Fuente line.
+  const bulletLines = out
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith("- "));
+
+  const hasFuente = /\bFuente\s*:/i.test(out);
+
+  if (looksLikeGarbage(out) || bulletLines.length < 4 || !hasFuente) {
+    return buildDeterministicExtraction(chunks);
+  }
+
+  // Keep ONLY first 4 bullets and the first Fuente line.
+  const first4 = bulletLines.slice(0, 4);
+  const fuenteLine = out
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .find((l) => /^Fuente\s*:/i.test(l));
+
+  const answer =
+    first4.join("\n") +
+    "\n" +
+    (fuenteLine || `Fuente: ${chunks?.[0]?.sourceHint || ""}`);
+  return { answer, sources: chunks };
 }
 
 // ============================================================================
@@ -493,7 +615,9 @@ async function validateModelIsGGUF(modelUrl) {
     const res = await fetch(modelUrl, { headers: { Range: "bytes=0-3" } });
 
     if (!res.ok) {
-      throw new Error(`No se pudo descargar el modelo (HTTP ${res.status}). Verifica la ruta /models y el nombre del archivo.`);
+      throw new Error(
+        `No se pudo descargar el modelo (HTTP ${res.status}). Verifica la ruta /models y el nombre del archivo.`
+      );
     }
 
     // Some servers ignore Range and return full content; still OK.
@@ -539,7 +663,12 @@ async function validateModelIsGGUF(modelUrl) {
       }
     }
 
-    if (sizeBytes && Number.isFinite(sizeBytes) && sizeBytes > 0 && sizeBytes < 50 * 1024 * 1024) {
+    if (
+      sizeBytes &&
+      Number.isFinite(sizeBytes) &&
+      sizeBytes > 0 &&
+      sizeBytes < 50 * 1024 * 1024
+    ) {
       console.warn(
         "El modelo GGUF parece demasiado pequeño (<50MB). Probable descarga incompleta o ruta incorrecta:",
         sizeBytes,
@@ -656,8 +785,14 @@ async function handleLoadModel() {
       ? Math.max(2, Math.min(6, navigator.hardwareConcurrency || 4))
       : 1;
 
-    const LOAD_PARAMS = { n_ctx: 1024, n_batch: 128, n_threads: threads };
-    console.log('crossOriginIsolated:', window.crossOriginIsolated, 'Loading params:', LOAD_PARAMS);
+    //const LOAD_PARAMS = { n_ctx: 1024, n_batch: 128, n_threads: threads };
+    const LOAD_PARAMS = { n_ctx: 1536, n_batch: 128, n_threads: threads };
+    console.log(
+      "crossOriginIsolated:",
+      window.crossOriginIsolated,
+      "Loading params:",
+      LOAD_PARAMS
+    );
     if (!window.crossOriginIsolated) {
       console.warn(
         "crossOriginIsolated=false → forzando n_threads=1 (modo single-thread). Para multi-thread, habilita COOP/COEP en el servidor."
@@ -683,8 +818,12 @@ async function handleLoadModel() {
         if (free < need) {
           throw new Error(
             `Espacio insuficiente en el navegador para este modelo. ` +
-              `Necesitas ~${Math.round(need / (1024 ** 3) * 10) / 10} GB libres, ` +
-              `pero el navegador reporta ~${Math.round(free / (1024 ** 3) * 10) / 10} GB libres. ` +
+              `Necesitas ~${
+                Math.round((need / 1024 ** 3) * 10) / 10
+              } GB libres, ` +
+              `pero el navegador reporta ~${
+                Math.round((free / 1024 ** 3) * 10) / 10
+              } GB libres. ` +
               `\nTip: no uses Incógnito (cuota baja), limpia datos del sitio (Application → Storage), ` +
               `o usa un GGUF más pequeño (Q3/Q2) / un modelo <2GB para correr 100% en browser.`
           );
@@ -696,7 +835,7 @@ async function handleLoadModel() {
     // RangeError: offset is out of bounds (WASM memory/typed-array limits), even if storage quota is enough.
     const sizeBytes = validation?.sizeBytes;
     if (sizeBytes && sizeBytes >= 3.3 * 1024 ** 3) {
-      const gb = Math.round((sizeBytes / (1024 ** 3)) * 10) / 10;
+      const gb = Math.round((sizeBytes / 1024 ** 3) * 10) / 10;
       throw new Error(
         `El modelo es demasiado grande para correr 100% en navegador (≈${gb} GB). ` +
           `En WASM suele fallar con "offset is out of bounds" por límites de memoria. ` +
@@ -709,7 +848,10 @@ async function handleLoadModel() {
     if (navigator.storage && navigator.storage.estimate) {
       const est = await navigator.storage.estimate();
       if (est && est.quota && est.quota < 3 * 1024 ** 3) {
-        console.warn("Cuota de almacenamiento baja detectada (posible modo Incógnito):", est);
+        console.warn(
+          "Cuota de almacenamiento baja detectada (posible modo Incógnito):",
+          est
+        );
       }
     }
 
@@ -736,11 +878,7 @@ async function handleLoadModel() {
   } catch (err) {
     console.error("Error completo:", err);
     console.error("Stack:", err.stack);
-    setStatus(
-      "model-status",
-      `Error cargando modelo: ${err.message}`,
-      "error"
-    );
+    setStatus("model-status", `Error cargando modelo: ${err.message}`, "error");
     btn.disabled = false;
     modelSelect.disabled = false;
   }
@@ -778,7 +916,7 @@ async function handleIndex() {
 
     setStatus("index-status", "Creando chunks...", "loading");
     const chunks = createChunks(jsonData);
-    console.log({chunks}); // Agrega esta línea para dep
+    console.log({ chunks }); // Agrega esta línea para dep
 
     setStatus(
       "index-status",
@@ -955,31 +1093,43 @@ async function handleAsk() {
       ? filteredVectors
       : allVectors;
 
+    // const top10 = topK(qvec, vectorsForSearch, 10);
+    // const top4 = mmr(qvec, top10, vectorsForSearch, 4, 0.7);
     const top10 = topK(qvec, vectorsForSearch, 10);
-    const top4 = mmr(qvec, top10, vectorsForSearch, 4, 0.7);
+    const topN = mmr(qvec, top10, vectorsForSearch, 3, 0.7);
 
     // 4) traer chunks definitivos
-    const chunkKeys = top4.map((item) => item.chunkKey);
+    //const chunkKeys = top4.map((item) => item.chunkKey);
+    const chunkKeys = topN.map((item) => item.chunkKey);
     const retrievedChunks = await getChunksByKeys(chunkKeys);
     const uniqueChunks = dedupeByChunkKey(retrievedChunks);
 
     setStatus("answer-status", "Generando respuesta...", "loading");
     const prompt = buildPrompt(uniqueChunks, question);
-    console.log("RAG selected chunks:", uniqueChunks.map(c => ({ chunkKey: c.chunkKey, sourceHint: c.sourceHint })));
+    console.log(
+      "RAG selected chunks:",
+      uniqueChunks.map((c) => ({
+        chunkKey: c.chunkKey,
+        sourceHint: c.sourceHint,
+      }))
+    );
     console.log("RAG prompt (first 2000 chars):", prompt.slice(0, 2000));
 
     const response = await state.wllama.createCompletion(prompt, {
-      nPredict: 256,
+      nPredict: 128, //160,
       sampling: {
-        temp: 0.1,
-        top_p: 0.9,
+        temp: 0.2,
+        top_p: 0.95,
       },
     });
 
-    const answer = response.trim();
+    const formatted = enforceExtractionFormat(response, uniqueChunks);
+    const answer = formatted.answer;
     // Guardrail: if the user asked for a specific day, avoid mentioning other days.
     if (requestedDay !== null) {
-      const dayMention = answer.toLowerCase().match(/\b(d[ií]a)\s*(\d{1,2})\b/g);
+      const dayMention = answer
+        .toLowerCase()
+        .match(/\b(d[ií]a)\s*(\d{1,2})\b/g);
       if (dayMention) {
         // If any mentioned day differs from requestedDay, append a warning for debugging.
         const mismatched = dayMention.some((m) => {
@@ -987,11 +1137,16 @@ async function handleAsk() {
           return Number.isFinite(num) && num !== requestedDay;
         });
         if (mismatched) {
-          console.warn("Respuesta menciona un día distinto al solicitado. requestedDay=", requestedDay, "mentions=", dayMention);
+          console.warn(
+            "Respuesta menciona un día distinto al solicitado. requestedDay=",
+            requestedDay,
+            "mentions=",
+            dayMention
+          );
         }
       }
     }
-    showAnswer(answer, uniqueChunks);
+    showAnswer(answer, formatted.sources || uniqueChunks);
     setStatus("answer-status", "Respuesta generada", "success");
   } catch (err) {
     console.error(err);

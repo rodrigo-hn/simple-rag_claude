@@ -42,6 +42,13 @@ La aplicación incluye un selector con dos versiones del modelo LiquidAI LFM2-1.
 - Archivo: `LiquidAI_LFM2-1.2B-RAG-Q5_K_M.gguf` (~1GB)
 - Cuantización Q5_K_M: Mejor calidad de respuestas
 
+### Modelos clínicos adicionales (experimentales)
+Actualmente probados en la app:
+- **MedPhi Instruct Q2/Q3/Q4 GGUF** (≈1.3–1.8GB)
+  - Compatibles con llama.cpp / wllama
+  - Recomendado usar Q2 o Q3 para navegador
+  - Requieren `n_ctx >= 1536`
+
 **Descargar ambos modelos:**
 ```bash
 ./download-liquidai-models.sh
@@ -82,7 +89,8 @@ http://<IP>:3030
 4. **Preguntar**: Escribe tu pregunta y presiona "Preguntar":
    - Genera embedding con prefijo "query:"
    - Recupera top-10 chunks más relevantes
-   - Aplica MMR para seleccionar 4 chunks diversos
+   - Aplica MMR para seleccionar 3 chunks diversos
+   - Compacta automáticamente el texto clínico para no exceder el contexto
    - Genera respuesta con el LLM
    - Muestra fuentes utilizadas
 
@@ -150,6 +158,9 @@ local-chat/
 - **Retrieval**: Cosine similarity + MMR (λ=0.7) para diversidad
 - **Chunking inteligente**: Por secciones del documento médico
 - **Almacenamiento persistente**: IndexedDB para chunks y vectores
+- **Gestión de contexto inteligente**: Compactación automática de chunks largos antes de enviarlos al LLM
+- **Protección anti-loop**: Fallback determinístico si el modelo entra en bucles numéricos
+- **Contexto aumentado**: `n_ctx = 1536` por defecto
 
 ## Troubleshooting
 
@@ -165,6 +176,8 @@ local-chat/
 - El modelo GGUF puede requerir bastante RAM
 - Cierra otras pestañas del navegador
 - Usa un modelo más pequeño si es necesario
+- Si aparece `Running out of context cache`, asegúrate de usar `n_ctx >= 1536`
+- Para modelos >1GB se recomienda Q2 o Q3
 
 ## Puerto del servidor
 

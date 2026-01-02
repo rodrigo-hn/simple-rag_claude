@@ -10,6 +10,8 @@ Genera una app (solo HTML/CSS/JS) llamada **local-chat** que:
   - prefijos obligatorios: `query:` y `passage:`
 - Guarda el índice (vectores + chunks) en **IndexedDB**.
 - Backend mínimo (Express) SOLO para servir archivos estáticos y el `.gguf/.wasm` en **mismo origin**.
+- Soporta modelos clínicos grandes (MedPhi Q2/Q3/Q4 GGUF) con carga estable en navegador.
+- Implementa compactación automática de contexto y protección anti-loop en la salida.
 
 ---
 
@@ -18,6 +20,7 @@ Genera una app (solo HTML/CSS/JS) llamada **local-chat** que:
 - LLM: `@wllama/wllama`
 - Embeddings: `@huggingface/transformers` (Transformers.js)
 - Backend: Node + Express (solo static)
+- Soporte multi-hilo dinámico cuando `crossOriginIsolated=true`.
 
 ---
 
@@ -49,7 +52,10 @@ Elementos:
    - iniciar Wllama con paths wasm:
      - /esm/single-thread/wllama.wasm
      - /esm/multi-thread/wllama.wasm
-   - loadModelFromUrl(`/models/LFM2-350M.Q4_K_M.gguf`)
+   - loadModelFromUrl(`/models/<modelo>.gguf`) con params conservadores por defecto:
+     - n_ctx = 1536
+     - n_batch = 128
+     - n_threads = dinámico (2–6 si crossOriginIsolated, si no 1)
 3) Usuario sube JSON.
 4) Click “Indexar”:
    - chunking del JSON (ver abajo)
@@ -62,13 +68,14 @@ Elementos:
 5) Usuario pregunta:
    - qvec = embed("query: " + pregunta), normalize
    - cosine topK=10
-   - MMR para seleccionar K=4 (lambda=0.7)
-   - construir prompt:
-     - instrucciones estrictas
-     - contexto = 4 chunks con sourceHint
-     - pregunta
-   - generar con wllama
-   - mostrar respuesta
+   - MMR para seleccionar K=3 (lambda=0.7)
+   - Compactar automáticamente los chunks (usar preferentemente [TEXTO], truncar a ~1200 chars)
+   - construir prompt compacto
+   - generar con wllama (nPredict≈128)
+   - post-procesar salida:
+     - exigir 4 viñetas + "Fuente:"
+     - fallback determinístico si el modelo entra en bucles o formato inválido
+   - mostrar respuesta y fuentes
 
 ---
 
@@ -89,6 +96,8 @@ Cada chunk debe tener:
   - `[DOC 1416169 | evolucion_dia | dia=5]`
 
 docId = `id_atencion` del JSON.
+
+Nota: los textos largos se compactan automáticamente antes de enviarse al LLM.
 
 ---
 
@@ -113,18 +122,32 @@ Funciones mínimas:
 Implementar:
 - cosine(query, vec) usando dot product (vectores normalizados)
 - topK=10 por score
-- MMR (lambda=0.7) para elegir K=4
+- MMR (lambda=0.7) para elegir K=3
+- Compactación automática de chunks antes del prompt
 
 ---
 
-## Prompt final (simple y estricto)
+## Prompt final (compacto y estricto)
 Formato:
-- “Responde en español.”
-- “Usa SOLO el CONTEXTO.”
-- “Si no está, di: No está en el informe.”
-- CONTEXTO: lista de chunks con sourceHint + text
+- "TAREA: extrae 4 frases EXACTAS del CONTEXTO."
+- "FORMATO: 4 líneas con '- ' y luego una sola línea: 'Fuente: <sourceHint>'."
+- "PROHIBIDO: inventar, resumir, interpretar."
+- CONTEXTO: lista de chunks compactados (sourceHint + texto)
 - Pregunta: ...
 - Respuesta: ...
+
+---
+
+## Características técnicas
+- Compactación automática de contexto
+- Protección anti-loop con fallback determinístico
+- `n_ctx` por defecto = 1536
+- `nPredict` ≈ 128
+
+---
+
+## Troubleshooting
+- Error `Running out of context cache`: aumentar `n_ctx` a 2048 y verificar compactación activa.
 
 ---
 

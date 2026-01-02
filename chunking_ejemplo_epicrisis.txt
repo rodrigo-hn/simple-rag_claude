@@ -1,0 +1,40 @@
+	"1416169::alta"	
+{chunkKey: '1416169::alta', text: '[TIPO] Indicaciones de alta\n[ALTA] 2025-12-26\n\n\nMe…eas o vomitos persistentes\n- Ictericia progresiva', sourceHint: '[DOC 1416169 | alta]', chunkType: 'alta'}
+chunkKey
+: 
+"1416169::alta"
+chunkType
+: 
+"alta"
+sourceHint
+: 
+"[DOC 1416169 | alta]"
+text
+: 
+"[TIPO] Indicaciones de alta\n[ALTA] 2025-12-26\n\n\nMedicamentos:\n- [ATC:J01DH02] Meropenem dosis 1g vía EV freq cada 8 horas duración Completar esquema segun infectologia\n\nControles:\n- Control con cirugia de torax en caso de sintomas respiratorios\n- Control con cirugia digestiva para seguimiento de colostomia\n- Control con infectologia para ajuste de antibioticos\n- Retiro de puntos de pleurostomia en 5-7 dias\nCuidados:\n- Curacion de herida perineal con VAC segun indicacion\n- Curacion de sitio de pleurostomia\n- Cuidados de colostomia\n- Kinesioterapia respiratoria y motora\n- Ejercicios con Triflo\nSignos de alarma:\n- Fiebre mayor a 38C\n- Disnea o dificultad respiratoria\n- Dolor toracico\n- Aumento de volumen o secrecion por heridas\n- Nauseas o vomitos persistentes\n- Ictericia progresiva"
+1	"1416169::evo:1"	
+{chunkKey: '1416169::evo:1', text: '[TIPO] Evolución diaria\n[DIA] 1\n[INGRESO] 2025-12-…8 AM. - CONTROL DE RX MANANA - KNT R Y M + TRIFLO', sourceHint: '[DOC 1416169 | evolucion_dia | dia=1]', chunkType: 'evolucion_dia', day: 1}
+2	"1416169::evo:10"	
+{chunkKey: '1416169::evo:10', text: '[TIPO] Evolución diaria\n[DIA] 10\n[INGRESO] 2025-12…ENER MANEJO DE ASCITIS (EL CUAL HA SIDO EFECTIVO)', sourceHint: '[DOC 1416169 | evolucion_dia | dia=10]', chunkType: 'evolucion_dia', day: 10}
+3	"1416169::evo:12"	
+{chunkKey: '1416169::evo:12', text: '[TIPO] Evolución diaria\n[DIA] 12\n[INGRESO] 2025-12…EN 5-7 DIAS REEVALUACION POR CIRUGIA DE TORAX SOS', sourceHint: '[DOC 1416169 | evolucion_dia | dia=12]', chunkType: 'evolucion_dia', day: 12}
+4	"1416169::evo:2"	
+{chunkKey: '1416169::evo:2', text: '[TIPO] Evolución diaria\n[DIA] 2\n[INGRESO] 2025-12-…VO KNT R Y M + TRIFLO SEGUIMIENTO DE PLEUROSTOMIA', sourceHint: '[DOC 1416169 | evolucion_dia | dia=2]', chunkType: 'evolucion_dia', day: 2}
+5	"1416169::evo:3"	
+{chunkKey: '1416169::evo:3', text: '[TIPO] Evolución diaria\n[DIA] 3\n[INGRESO] 2025-12-…EJO A FIN DE DISMINUIR DEBITO DE DRENAJE TORACICO', sourceHint: '[DOC 1416169 | evolucion_dia | dia=3]', chunkType: 'evolucion_dia', day: 3}
+6	"1416169::evo:4"	
+{chunkKey: '1416169::evo:4', text: '[TIPO] Evolución diaria\n[DIA] 4\n[INGRESO] 2025-12-…NA/GASTRO | EN SIMILARES CONDICIONES. CON NAUSEAS', sourceHint: '[DOC 1416169 | evolucion_dia | dia=4]', chunkType: 'evolucion_dia', day: 4}
+7	"1416169::evo:5"	
+{chunkKey: '1416169::evo:5', text: '[TIPO] Evolución diaria\n[DIA] 5\n[INGRESO] 2025-12-… traslado a sala de mayor complejidad atte AGUAYO', sourceHint: '[DOC 1416169 | evolucion_dia | dia=5]', chunkType: 'evolucion_dia', day: 5}
+8	"1416169::evo:6"	
+{chunkKey: '1416169::evo:6', text: '[TIPO] Evolución diaria\n[DIA] 6\n[INGRESO] 2025-12-…VO KNT + TRIFLO SE REEVALUARA RETIRO SEGUN DEBITO', sourceHint: '[DOC 1416169 | evolucion_dia | dia=6]', chunkType: 'evolucion_dia', day: 6}
+9	"1416169::evo:7"	
+{chunkKey: '1416169::evo:7', text: '[TIPO] Evolución diaria\n[DIA] 7\n[INGRESO] 2025-12-…IVO RETIRO CON DEBITO CERCANO A 150 CC KN T R Y M', sourceHint: '[DOC 1416169 | evolucion_dia | dia=7]', chunkType: 'evolucion_dia', day: 7}
+10	"1416169::evo:8"	
+{chunkKey: '1416169::evo:8', text: '[TIPO] Evolución diaria\n[DIA] 8\n[INGRESO] 2025-12-… DEBITO PARA RETIRO DE SEP. POR AHORA SIN CAMBIOS', sourceHint: '[DOC 1416169 | evolucion_dia | dia=8]', chunkType: 'evolucion_dia', day: 8}
+11	"1416169::evo:9"	
+{chunkKey: '1416169::evo:9', text: '[TIPO] Evolución diaria\n[DIA] 9\n[INGRESO] 2025-12-…NO ASPIRATIVO EVENTUAL RETIRO MANANA SEGUN DEBITO', sourceHint: '[DOC 1416169 | evolucion_dia | dia=9]', chunkType: 'evolucion_dia', day: 9}
+12	"1416169::labs"	
+{chunkKey: '1416169::labs', text: '[TIPO] Laboratorios\n[INGRESO] 2025-12-15\n[ALTA] 20…cha=2025-12-25T07:11:09 periodo[min=170, max=170]', sourceHint: '[DOC 1416169 | laboratorios]', chunkType: 'laboratorios'}
+13	"1416169::resumen"	
+{chunkKey: '1416169::resumen', text: '[TIPO] Epicrisis\n[INGRESO] 2025-12-15\n[ALTA] 2025-…01] Me

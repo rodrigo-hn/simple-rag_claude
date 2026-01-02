@@ -20,6 +20,7 @@ Se le ordenó tratamiento inmediato con enalapril y metformina.
 LiquidAI_LFM2-1.2B-RAG-Q4_K_M.gguf">LiquidAI LFM2-1.2B-RAG Q4 (~800MB - Equilibrado)
 
 ¿como fue la evolucion del paciente del dia 3?
+¿cómo fue la evolución del paciente del día 3?
 Fuentes:
 [DOC 1416169 | evolucion_dia | dia=3]
 [DOC 1416169 | evolucion_dia | dia=3]

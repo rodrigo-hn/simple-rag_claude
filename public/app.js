@@ -7,7 +7,9 @@ import {
 // Configurar Transformers.js
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
-env.backends.onnx.wasm.numThreads = navigator.hardwareConcurrency || 4;
+env.backends.onnx.wasm.numThreads = window.crossOriginIsolated
+  ? (navigator.hardwareConcurrency || 4)
+  : 1;
 env.backends.onnx.wasm.proxy = false;
 
 // Estado global
@@ -460,23 +462,123 @@ function mmr(queryVec, candidates, allVectors, k, lambda = 0.7) {
 
 function buildPrompt(chunks, question) {
   let prompt = "";
-  prompt += "Eres un asistente clínico.\n";
-  prompt += "Responde en español.\n";
-  prompt += "REGLAS ESTRICTAS:\n";
-  prompt += "1) Usa SOLO información que aparezca literalmente en el CONTEXTO.\n";
-  prompt += "2) NO inventes datos (fechas, días, valores, unidades, signos vitales).\n";
-  prompt += "3) NO conviertas unidades ni interpretes abreviaturas. Copia los términos tal cual (ej: 'SAT 96-98', 'FIO2 AMBIENTAL', '800 CC').\n";
-  prompt += "4) Si algo no está explícito, escribe: 'No está en el informe'.\n";
-  prompt += "5) Responde en 3 a 6 viñetas. Al final agrega una línea: 'Fuente: <sourceHint>'.\n\n";
+  prompt += "Eres un motor de extracción clínica.\n";
+  prompt += "NO redactes. NO resumas. NO interpretes.\n";
+  prompt += "SOLO COPIA FRASES EXACTAS DEL CONTEXTO.\n";
+  prompt += "REGLAS (OBLIGATORIAS):\n";
+  prompt += "1) Responde con EXACTAMENTE 4 viñetas.\n";
+  prompt += "2) Cada viñeta DEBE ser una frase copiada literalmente del CONTEXTO (sin cambiar palabras ni unidades).\n";
+  prompt += "3) NO agregues palabras propias, NO agregues negaciones generales tipo 'No hay signos de...' salvo que exista literalmente en el CONTEXTO.\n";
+  prompt += "4) Después de las 4 viñetas, escribe EXACTAMENTE una línea: 'Fuente: <sourceHint>'.\n";
+  prompt += "5) No escribas nada más después de la línea Fuente.\n\n";
 
   prompt += "CONTEXTO:\n";
-  chunks.forEach((chunk, idx) => {
-    prompt += `${idx + 1}. ${chunk.sourceHint}\n${chunk.text}\n\n`;
+  chunks.forEach((chunk, i) => {
+    prompt += `${i + 1}. ${chunk.sourceHint}\n${chunk.text}\n\n`;
   });
 
   prompt += `Pregunta: ${question}\n`;
-  prompt += "Respuesta (viñetas):";
+  prompt += "Respuesta:\n- ";
   return prompt;
+}
+
+// ============================================================================
+// Model file validation (GGUF)
+// ============================================================================
+
+async function validateModelIsGGUF(modelUrl) {
+  // Try to fetch the first 4 bytes via Range to verify the GGUF magic.
+  // GGUF files start with ASCII "GGUF".
+  try {
+    const res = await fetch(modelUrl, { headers: { Range: "bytes=0-3" } });
+
+    if (!res.ok) {
+      throw new Error(`No se pudo descargar el modelo (HTTP ${res.status}). Verifica la ruta /models y el nombre del archivo.`);
+    }
+
+    // Some servers ignore Range and return full content; still OK.
+    const buf = await res.arrayBuffer();
+    const view = new Uint8Array(buf.slice(0, 4));
+    const magic = String.fromCharCode(...view);
+
+    if (magic !== "GGUF") {
+      // If the server returned HTML (often starts with '<!DO' or '<htm'), show a clearer message.
+      const maybeText = String.fromCharCode(...view);
+      throw new Error(
+        `Archivo de modelo inválido (magic='${maybeText}'). Debe ser GGUF ('GGUF'). ` +
+          `Posibles causas: descargaste un GGML antiguo (prefijo 'ggml-model-*'), el archivo está corrupto/incompleto, ` +
+          `o el servidor devolvió una página HTML (404) en vez del .gguf.\n` +
+          `Solución: descarga un .gguf real (ej: 'biomistral-7b.Q4_K_S.gguf') y colócalo en /public/models/.`
+      );
+    }
+
+    // NOTE: When we use Range=0-3, Content-Length is often just "4".
+    // We only do size sanity checks once we know the TOTAL size (from Content-Range or HEAD).
+
+    // Try to obtain size (bytes). Prefer Content-Range for range responses.
+    let sizeBytes = null;
+    const cr = res.headers.get("content-range");
+    if (cr) {
+      // Format: bytes 0-3/123456789
+      const m = cr.match(/\/(\d+)\s*$/);
+      if (m) sizeBytes = Number(m[1]);
+    }
+    if (!sizeBytes) {
+      const cl2 = res.headers.get("content-length");
+      if (cl2) sizeBytes = Number(cl2);
+    }
+
+    // Fallback: HEAD request (may be blocked/unsupported)
+    if (!sizeBytes) {
+      try {
+        const head = await fetch(modelUrl, { method: "HEAD" });
+        const hcl = head.headers.get("content-length");
+        if (hcl) sizeBytes = Number(hcl);
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    if (sizeBytes && Number.isFinite(sizeBytes) && sizeBytes > 0 && sizeBytes < 50 * 1024 * 1024) {
+      console.warn(
+        "El modelo GGUF parece demasiado pequeño (<50MB). Probable descarga incompleta o ruta incorrecta:",
+        sizeBytes,
+        "bytes"
+      );
+    }
+
+    return { ok: true, sizeBytes };
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ============================================================================
+// Browser storage diagnostics (OPFS/IndexedDB)
+// ============================================================================
+
+async function tryPersistStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      const persisted = await navigator.storage.persist();
+      console.log("Storage persist granted:", persisted);
+      return persisted;
+    }
+  } catch (e) {
+    console.warn("Storage persist check failed:", e);
+  }
+  return false;
+}
+
+async function getStorageEstimate() {
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      return await navigator.storage.estimate();
+    }
+  } catch (e) {
+    console.warn("Storage estimate failed:", e);
+  }
+  return null;
 }
 
 // ============================================================================
@@ -525,6 +627,13 @@ async function handleLoadModel() {
   btn.disabled = true;
   modelSelect.disabled = true;
   setStatus("model-status", `Cargando modelo ${selectedModel}...`, "loading");
+  if (!window.crossOriginIsolated) {
+    setStatus(
+      "model-status",
+      `Cargando modelo ${selectedModel} (single-thread: crossOriginIsolated=false)...`,
+      "loading"
+    );
+  }
 
   try {
     const baseUrl = window.location.origin;
@@ -542,10 +651,70 @@ async function handleLoadModel() {
 
     const modelUrl = `${baseUrl}/models/${selectedModel}`;
     console.log("Loading model from:", modelUrl);
+    // Browser WASM: keep ctx conservative, but enable multi-thread when crossOriginIsolated=true for speed.
+    const threads = window.crossOriginIsolated
+      ? Math.max(2, Math.min(6, navigator.hardwareConcurrency || 4))
+      : 1;
+
+    const LOAD_PARAMS = { n_ctx: 1024, n_batch: 128, n_threads: threads };
+    console.log('crossOriginIsolated:', window.crossOriginIsolated, 'Loading params:', LOAD_PARAMS);
+    if (!window.crossOriginIsolated) {
+      console.warn(
+        "crossOriginIsolated=false → forzando n_threads=1 (modo single-thread). Para multi-thread, habilita COOP/COEP en el servidor."
+      );
+    }
+
+    // Validate the file is a real GGUF before attempting to load.
+    const validation = await validateModelIsGGUF(modelUrl);
+
+    // Storage diagnostics: large GGUF models require OPFS/IndexedDB quota.
+    const persisted = await tryPersistStorage();
+    const estimate = await getStorageEstimate();
+    if (estimate) {
+      const { usage, quota } = estimate;
+      console.log("Storage estimate:", { usage, quota, persisted });
+
+      // If we know the model size, ensure there's enough free quota.
+      const sizeBytes = validation?.sizeBytes;
+      if (sizeBytes && quota) {
+        const free = quota - (usage || 0);
+        // Keep a safety margin (model downloads may need overhead).
+        const need = sizeBytes * 1.15;
+        if (free < need) {
+          throw new Error(
+            `Espacio insuficiente en el navegador para este modelo. ` +
+              `Necesitas ~${Math.round(need / (1024 ** 3) * 10) / 10} GB libres, ` +
+              `pero el navegador reporta ~${Math.round(free / (1024 ** 3) * 10) / 10} GB libres. ` +
+              `\nTip: no uses Incógnito (cuota baja), limpia datos del sitio (Application → Storage), ` +
+              `o usa un GGUF más pequeño (Q3/Q2) / un modelo <2GB para correr 100% en browser.`
+          );
+        }
+      }
+    }
+
+    // Browser WASM practical limit: very large GGUFs (≈3.5–4GB+) can fail with
+    // RangeError: offset is out of bounds (WASM memory/typed-array limits), even if storage quota is enough.
+    const sizeBytes = validation?.sizeBytes;
+    if (sizeBytes && sizeBytes >= 3.3 * 1024 ** 3) {
+      const gb = Math.round((sizeBytes / (1024 ** 3)) * 10) / 10;
+      throw new Error(
+        `El modelo es demasiado grande para correr 100% en navegador (≈${gb} GB). ` +
+          `En WASM suele fallar con "offset is out of bounds" por límites de memoria. ` +
+          `\nRecomendado: usa BioMistral-7B en Q3/Q2 (más pequeño), o un modelo <=1.5GB (1–2B params). ` +
+          `Alternativa: correr 7B en llama.cpp nativo (desktop) o en un backend local.`
+      );
+    }
+
+    // Improve the model-loading status message when in Incognito / not persisted.
+    if (navigator.storage && navigator.storage.estimate) {
+      const est = await navigator.storage.estimate();
+      if (est && est.quota && est.quota < 3 * 1024 ** 3) {
+        console.warn("Cuota de almacenamiento baja detectada (posible modo Incógnito):", est);
+      }
+    }
 
     await state.wllama.loadModelFromUrl(modelUrl, {
-      n_ctx: 4096,
-      n_threads: navigator.hardwareConcurrency || 4,
+      ...LOAD_PARAMS,
       n_gpu_layers: 0, // CPU only for browser compatibility
     });
 
@@ -567,7 +736,11 @@ async function handleLoadModel() {
   } catch (err) {
     console.error("Error completo:", err);
     console.error("Stack:", err.stack);
-    setStatus("model-status", `Error: ${err.message}`, "error");
+    setStatus(
+      "model-status",
+      `Error cargando modelo: ${err.message}`,
+      "error"
+    );
     btn.disabled = false;
     modelSelect.disabled = false;
   }
@@ -796,7 +969,7 @@ async function handleAsk() {
     console.log("RAG prompt (first 2000 chars):", prompt.slice(0, 2000));
 
     const response = await state.wllama.createCompletion(prompt, {
-      nPredict: 512,
+      nPredict: 256,
       sampling: {
         temp: 0.1,
         top_p: 0.9,
